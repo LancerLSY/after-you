@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080e15">
+  <meta name="description" content="Your past is coming for you. Collect light, leave an echo, dash through your past. A free 60-second browser arcade game.">
+  <meta property="og:title" content="AFTER YOU — Your past is coming for you.">
+  <meta property="og:description" content="60 seconds. Every path becomes a ghost. Dash through your past and challenge a friend.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://after-you-echo-arcade.lanceryou.chatgpt.site/assets/social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <title>AFTER YOU — Your past is coming for you.</title>
+</head>
+<body>
+  <div class="shell">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="AFTER YOU home"><svg viewBox="0 0 52 30" aria-hidden="true"><circle cx="17" cy="15" r="13"/><circle cx="35" cy="15" r="13"/></svg><span>AFTER YOU</span></a>
+      <nav aria-label="Main navigation">
+        <button id="help-button" data-i18n="how">How to play</button>
+        <button id="sound-button" aria-pressed="false">Sound off</button>
+        <button id="language-button" aria-label="Switch to Chinese">中文</button>
+        <a id="source-link" href="https://github.com/LancerLSY/after-you" target="_blank" rel="noopener noreferrer" data-i18n="source">Source ↗</a>
+      </nav>
+    </header>
+    <main>
+      <section class="game-layout" aria-label="AFTER YOU game">
+        <div class="intro">
+          <h1 data-i18n="headline">Your past is<br>coming for you.</h1>
+          <p class="lede" data-i18n="lede">Collect light. Leave an echo.<br>Dash through your past.</p>
+          <div class="mode-picker" role="group" aria-label="Game mode">
+            <button id="daily-mode" class="selected" aria-pressed="true" data-i18n="daily">Daily loop</button>
+            <button id="free-mode" aria-pressed="false" data-i18n="free">Free play</button>
+            <button id="boss-mode" aria-pressed="false" data-i18n="bossLab">Boss lab</button>
+          </div>
+          <button class="primary" id="play-button"><span data-i18n="enter">Enter the loop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></button>
+          <p class="controls-hint" data-i18n="keys">WASD / arrows to move · Space to dash</p>
+          <p class="mobile-hint" data-i18n="touch">Drag in the arena to move · Tap DASH</p>
+          <div class="personal"><span data-i18n="best">YOUR BEST</span><strong id="best-score">—</strong><span id="seed-label"></span></div>
+          <p id="challenge-label" class="challenge-label" hidden></p>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="arena-column">
+          <div class="arena" id="arena">
+            <canvas id="game-canvas" width="800" height="560" tabindex="0" aria-label="Game arena. Move with WASD or arrow keys, Space to dash, Escape to pause. Touch and drag to move."></canvas>
+            <div class="hud" aria-hidden="true">
+              <div class="score"><span data-i18n="score">SCORE</span><strong id="score">0000</strong></div>
+              <div class="loop"><span data-i18n="loop">LOOP</span><strong id="loop">01</strong></div>
+              <div class="timer"><strong id="timer">60.0</strong><span>s</span></div>
+            </div>
+            <div class="arena-meta" id="arena-meta"><span id="health" aria-label="3 lives">◇ ◇ ◇</span><span id="combo"></span><button id="pause-button" aria-label="Pause game" title="Pause (Esc)">Ⅱ</button></div>
+            <div class="arena-message" id="arena-message" aria-hidden="true"></div>
+            <div class="arena-bottom"><span id="arena-hint" data-i18n="arenaHint">Every 10 seconds, your path becomes an echo.</span><span id="dash-ready" hidden>SPACE · DASH</span></div>
+            <div class="progress-track"><div id="loop-progress"></div></div>
+            <section id="pause-overlay" class="overlay" hidden aria-label="Paused"><p class="overlay-note" data-i18n="breath">Take a breath.</p><h2 data-i18n="paused">Time stands still.</h2><button id="resume-button" class="primary" data-i18n="resume">Back to the loop</button><button id="abandon-button" class="text-button" data-i18n="restart">Start again</button></section>
+            <section id="result-overlay" class="overlay" hidden aria-label="Game results">
+              <p class="overlay-note" id="result-note"></p><h2 id="result-title"></h2><div class="result-score" id="result-score">0</div>
+              <p class="result-detail" id="result-detail"></p>
+              <div class="result-actions"><button id="again-button" class="primary" data-i18n="again">One more loop ↗</button><button id="share-button" class="secondary" data-i18n="challenge">Challenge a friend</button></div>
+              <button id="forge-button" class="forge-button" hidden></button>
+              <div class="result-links"><button id="replay-button" data-i18n="watch">Watch replay</button><button id="download-button" data-i18n="saveReplay">Save replay</button><button id="card-button" data-i18n="saveCard">Save score card</button></div>
+              <p id="share-status" role="status" class="share-status"></p>
+            </section>
+            <div id="replay-tag" class="replay-tag" hidden><span data-i18n="replay">REPLAY</span><button id="stop-replay" data-i18n="close">Close</button></div>
+          </div>
+          <div class="touch-actions"><span id="mobile-help" data-i18n="touchHelp">Move anywhere in the arena</span><button id="dash-button" aria-label="Dash">DASH <span>↗</span></button></div>
+        </div>
+      </section>
+      <section class="instructions" id="how-to-play" aria-label="How to play">
+        <article><span class="number">01</span><div><h2 data-i18n="step1">Collect the light</h2><p data-i18n="step1body">Keep moving. Chain luminous fragments to grow your score.</p></div></article>
+        <article><span class="number">02</span><div><h2 data-i18n="step2">Break your echoes</h2><p data-i18n="step2body">Your path returns every 10 seconds. Dash through it for a bonus.</p></div></article>
+        <article><span class="number">03</span><div><h2 data-i18n="step3">Challenge a friend</h2><p data-i18n="step3body">Same seed. Same lights. Send your score and see who does better.</p></div></article>
+      </section>
+    </main>
+    <footer><span></span><p data-i18n="footer">60 seconds. You versus every version of you.</p><span></span></footer>
+  </div>
+  <dialog id="help-dialog">
+    <button class="dialog-close" aria-label="Close instructions">×</button><h2 data-i18n="helpTitle">Make peace with your past.<br>Or dash through it.</h2>
+    <div id="help-content"></div><button id="help-play" class="primary" data-i18n="gotIt">Got it. Let's play ↗</button>
+  </dialog>
+  <dialog id="source-dialog"><button class="dialog-close" aria-label="Close source information">×</button><h2>Built to be remixed.</h2><p data-i18n="sourceBody">A tiny, dependency-free arcade engine. Deterministic replays, seeded challenges, and all the game rules in one readable module.</p><p id="source-status" data-i18n="sourcePending">The public repository is being prepared. The game is fully playable here.</p></dialog>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
