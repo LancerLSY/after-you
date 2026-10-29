@@ -1,16 +1,17 @@
 {
   "name": "after-you",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "A 60-second arcade game where your past becomes your next target.",
+  "description": "A short arena game where your old dash paths become enemies or allies.",
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
     "test": "node --test tests/*.test.js",
     "check": "node scripts/check.mjs",
     "build:portable": "node scripts/build-portable.mjs",
-    "demo:refresh": "node scripts/balance-probe.mjs --write-demo"
+    "demo:refresh": "node scripts/balance-probe.mjs --write-demo",
+    "probe:rush": "node scripts/rush-probe.mjs"
   },
   "engines": {
     "node": ">=20"

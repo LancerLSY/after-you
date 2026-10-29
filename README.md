@@ -1,22 +1,37 @@
 # AFTER YOU
 
-**Dash through your past. Turn your moves into a friend's boss.**
+**Your past. Your next weapon.**
 
-A browser arcade game where your movements become the enemy. Survive a 60-second loop, then turn your run into a three-phase boss that a friend has 30 seconds to beat.
+Echo Rush is a 36-second arena game. Hold to aim, release to dash, then choose abilities that change what your recorded paths do: friendly replays, wall reflections, local explosions, or pruning old danger. Defeat your final echo to win.
 
 [中文说明](README.zh-CN.md) · [GitHub](https://github.com/LancerLSY/after-you) · [Contribute a mod](CONTRIBUTING.md) · [MIT code](LICENSE)
 
-**[Play in your browser](https://after-you-echo-arcade.lanceryou.chatgpt.site)** · **[Watch the 14-second scripted demo](https://after-you-echo-arcade.lanceryou.chatgpt.site/assets/launch-demo.webm)**
+**[Play in your browser](https://after-you-echo-arcade.lanceryou.chatgpt.site)**
 
 No account or installation needed. You can also run it locally below.
 
-![AFTER YOU gameplay: a glowing player, collected light, and echoes of past movements](docs/gameplay.png)
+![AFTER YOU gameplay: a glowing player, collected light, and echoes of past movements](docs/rush-gameplay.png)
+
+## Echo Rush: build a different next move
+
+The new default mode responds to the first playtest’s report that the game felt repetitive.
+
+- Three hittable enemies are present immediately. Hold mouse/Space to aim; release to dash. Hits refund the dash cooldown.
+- At 6 and 16 battle seconds, choose abilities that change geometry: **Relay**, **Ricochet**, **Burst**, and **Prune**. Relay repeats the actual reflected path you made, while Prune removes an old route and its hostile copies.
+- Focus slow-motion is limited. The battle timer continues during focus and pauses for explicit choices.
+- A six-hit final echo arrives at 26 seconds. Surviving without attacking cannot win.
+- Challenge links share a seed and a self-reported score; friends can try a different build. Rush replays record both inputs and upgrade choices.
+
+WASD/arrows move, holding mouse/Space aims, releasing fires, and Esc pauses. The old 60-second Classic and friend-made Boss modes remain at **[Classic / friend bosses](https://after-you-echo-arcade.lanceryou.chatgpt.site/?classic=1)**. Existing Boss links and version-1 challenge links still select those modes.
+
+The [14-second scripted video](https://after-you-echo-arcade.lanceryou.chatgpt.site/assets/launch-demo.webm) demonstrates the earlier Classic/Boss rules, not Rush. Video export is available in those modes. The build and combat changes are software-verified; replay motivation still needs human testing.
+
 
 ## Watch, record, and take it offline
 
-**Watch a demo** plays a real, recomputed Boss replay using scripted controls. It is labeled as a scripted demo and never updates your personal best.
+**In Classic / friend-made Boss modes, Watch a demo** plays a real, recomputed Boss replay using scripted controls. It is labeled as a scripted demo and never updates your personal best.
 
-After a run, **Save a clip** renders up to its last 14 seconds into a silent 720×960 vertical video. Preview the result, then choose **Download video**. WebM or MP4 support depends on the browser; the game does not upload the recording. Demo exports retain the scripted-demo label.
+In those modes, **Save a clip** renders up to its last 14 seconds into a silent 720×960 vertical video. Preview the result, then choose **Download video**. WebM or MP4 support depends on the browser; the game does not upload the recording. Demo exports retain the scripted-demo label.
 
 For a self-contained local copy:
 
@@ -27,7 +42,7 @@ npm run build:portable
 Open `output/after-you.html` in a modern browser. Artwork, font and code are embedded; no local server or package installation is needed for the generated file. See [portable edition details](docs/portable.md) for browser permission limits. This local build does not publish a website or change hosted access.
 
 
-## One minute. Every version of you.
+## Classic and friend-made Boss modes
 
 - **Your moves. Their boss.** Build a boss from your actual path, beat it yourself, then send the playable challenge in a compact link.
 - **Collect, then break.** Chain lights up to ×5. Dash through your echoes for a separate bonus. Three lives; one 60-second run.
@@ -113,3 +128,5 @@ Personal bests and preferences stay in your browser's local storage. Challenge-l
 Try a longer dash, a stricter collection window, a different echo rhythm, or an accessible visual theme. Keep rule-changing mods clearly named and separate from the original challenge scores. See [CONTRIBUTING.md](CONTRIBUTING.md) for the replay and testing contract.
 
 Code is licensed under [MIT](LICENSE). Generated artwork and its provenance are documented in [docs/assets-provenance.md](docs/assets-provenance.md).
+
+Rush uses `dist/rush.js`: `exportRushReplay()` records both inputs and upgrade choices, and `runRushReplay()` recomputes them. Its replay kind is `rush`; Classic/Boss replay version 1 remains unchanged in `dist/engine.js`.

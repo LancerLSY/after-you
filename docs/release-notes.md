@@ -30,3 +30,14 @@ Browser evidence: the video preview loaded at 720×960 with readyState 4 and no 
 Offline limitation: the browser tool only allows HTTP(S) and rejected file://. The file was generated and its packaging/execution-fixture tests passed; double-click execution has not been claimed as browser-verified. No alternate browser mechanism was used to evade that restriction.
 
 The v0.2 source passes 94 automated tests and the syntax/assets/credential check. Public hosting was verified in the browser for start, dash and pause without console errors. The packaged offline file remains unverified at file:// because the browser tool forbids that protocol.
+
+
+# v0.3 — change the battle loop after playtest feedback
+
+The first player reported no desire for another run because play felt repetitive. Echo Rush becomes the default: three initial targets, aim/release dashes, cooldown refunds on hits, two ability choices, and a required final fight within 36 battle seconds. Relay, Ricochet, Burst and Prune alter the use and geometry of recorded paths. Classic/Boss routes and replays remain available.
+
+Phone combat uses the same logical arena rotated into portrait, with characters kept upright and input inversely mapped. Targets occupy more physical screen space. Upgrade dialogs pause combat and offer three full-size choices.
+
+Evidence: 125 automated tests pass, including real UI-source event tests for frozen release direction, canceled input, key repeats after pause/choice, friend-label reset, replay choices, legacy hash routes and portrait mapping. Desktop mouse/keyboard release, first ability selection, replay result equality, phone layout and phone cards were exercised in the browser. Physical touch hardware and human replay motivation remain unverified for this revision.
+
+A first browser check exposed unbounded canvas backing-size feedback because the new canvas lacked CSS sizing. The arena now constrains it independently of intrinsic dimensions, and real finite backing dimensions were verified.

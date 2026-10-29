@@ -1,4 +1,5 @@
 import { RULES, getEchoState } from './engine.js';
+import { previewDash } from './rush.js';
 
 const WIDTH = RULES.width;
 const HEIGHT = RULES.height;
@@ -14,12 +15,28 @@ const FUTURE_DASH = [1, 5];
 const BOSS_FUTURE_DASH = [4, 4];
 const BOSS_COLORS = [LILAC, '#ffbd87', '#ff8eac'];
 const NO_DASH = [];
+const RUSH_PATH_DASH = [2, 6];
+const RUSH_AIM_DASH = [2, 7];
 const DEMO_LIGHTS = new Float32Array([125, 192, 665, 175, 595, 420, 246, 418, 405, 154]);
 const SPRITE_ANCHOR_X = [0.591, 0.535, 0.478];
 const SPRITE_ANCHOR_Y = [0.529, 0.522, 0.526];
 
 function clockSeconds() {
   return performance.now() / 1000;
+}
+
+/** Interpolate recorded time without cutting across a ricochet corner. */
+function sampleRushPath(points, time, out) {
+  if (!points?.length) return false;
+  let index = 1;
+  while (index < points.length && points[index].t < time) index += 1;
+  const a = points[Math.max(0, index - 1)];
+  const b = points[Math.min(index, points.length - 1)];
+  const span = b.t - a.t;
+  const mix = span > 0 ? Math.max(0, Math.min(1, (time - a.t) / span)) : 0;
+  out.x = a.x + (b.x - a.x) * mix;
+  out.y = a.y + (b.y - a.y) * mix;
+  return true;
 }
 
 /** Sample a recorded path into reusable storage; never modify simulation state. */
@@ -48,6 +65,7 @@ export class Renderer {
     this._width = 0;
     this._height = 0;
     this._dpr = 0;
+    this._portraitRush = false;
     this._lastClock = clockSeconds();
     this._startedAt = this._lastClock;
     this._lastGame = null;
@@ -176,6 +194,14 @@ export class Renderer {
         this._effect('ring', event.x, event.y, RULES.warningDuration, LILAC, 46);
       } else if (event.type === 'spawn') {
         this._effect('ring', event.x, event.y, 0.42, LIGHT, 20);
+      } else if (event.type === 'burst') {
+        this._effect('burst', event.x, event.y, 0.46, LIGHT, event.radius || 92);
+      } else if (event.type === 'relay') {
+        this._effect('ring', event.x, event.y, 0.32, MINT, 26);
+      } else if (event.type === 'upgrade' || event.type === 'choice') {
+        this._effect('ring', event.x, event.y, 0.65, MINT, 64);
+      } else if (event.type === 'boss' || event.type === 'phase') {
+        this._effect('ring', event.x, event.y, 0.8, ROSE, 76);
       }
     }
   }
@@ -186,17 +212,29 @@ export class Renderer {
     this._lastClock = now;
     if (this._dpr !== Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1)) || !this._observer) this.resize();
     const ctx = this.ctx;
-    ctx.setTransform(this._width / WIDTH, 0, 0, this._height / HEIGHT, 0, 0);
+    this._portraitRush = game?.mode === 'rush' && this.canvas.clientHeight > this.canvas.clientWidth;
+    if (this._portraitRush) ctx.setTransform(0, this._height / WIDTH, -this._width / HEIGHT, 0, this._width, 0);
+    else ctx.setTransform(this._width / WIDTH, 0, 0, this._height / HEIGHT, 0, 0);
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
     ctx.save();
     this._hitRemaining = Math.max(0, this._hitRemaining - dt);
     if (!reducedMotion && !demo && this._hitRemaining > 0) {
-      const shake = this._hitRemaining / 0.3 * 3;
+      const shake = this._hitRemaining / 0.3 * (game?.mode === 'rush' ? 1 : 3);
       ctx.translate(Math.sin(now * 71) * shake, Math.cos(now * 89) * shake);
     }
     const visualTime = reducedMotion ? 0 : now - this._startedAt;
     this._drawBackground(visualTime);
-    if (demo || !game) {
+    if (game?.mode === 'rush') {
+      if (game !== this._lastGame || game.time < this._lastGameTime || this._wasDemo) {
+        this._trailCount = 0;
+        this._trailHead = 0;
+        this._lastTrailTime = -1;
+      }
+      this._lastGame = game;
+      this._lastGameTime = game.time;
+      this._wasDemo = demo;
+      this._drawRush(game, visualTime, reducedMotion, demo);
+    } else if (demo || !game) {
       if (game?.mode === 'boss' && game.echoes[0]?.path?.length) this._drawBossDemo(game, visualTime, reducedMotion);
       else this._drawDemo(visualTime, reducedMotion);
       this._wasDemo = true;
@@ -251,6 +289,13 @@ export class Renderer {
 
   _drawSprite(index, x, y, height, alpha = 1) {
     const ctx = this.ctx;
+    if (this._portraitRush) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(-Math.PI / 2);
+      x = 0;
+      y = 0;
+    }
     ctx.globalAlpha = alpha;
     if (this._spriteSheet) {
       // Original 1776 × 888 sheet: three columns, transparent margin above/below.
@@ -285,6 +330,7 @@ export class Renderer {
       ctx.fill();
     }
     ctx.globalAlpha = 1;
+    if (this._portraitRush) ctx.restore();
   }
 
   _drawLight(x, y, time, remaining = 8) {
@@ -436,8 +482,8 @@ export class Renderer {
       ctx.arc(player.x, player.y, 20, 0, TAU);
       ctx.stroke();
       if (!reducedMotion) {
-        const dx = player.dashX;
-        const dy = player.dashY;
+        const dx = player.dashX ?? player.dirX;
+        const dy = player.dashY ?? player.dirY;
         ctx.globalAlpha = 0.42;
         ctx.beginPath();
         for (let lane = -1; lane <= 1; lane += 1) {
@@ -463,6 +509,169 @@ export class Renderer {
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.radius, 0, TAU);
     ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  _drawRush(game, visualTime, reducedMotion, demo) {
+    const worldTime = game.worldTime ?? game.time;
+    for (const trace of game.traces || []) {
+      this._drawRushPath(trace.points, LILAC, 0.13, 1.1, RUSH_PATH_DASH);
+    }
+    for (const relay of game.relays || []) this._drawRushRelay(relay, worldTime);
+    for (const target of game.targets || []) {
+      if (target !== game.nemesis) this._drawRushTarget(target, worldTime, visualTime, reducedMotion);
+    }
+    if (game.nemesis?.hp > 0) this._drawRushTarget(game.nemesis, worldTime, visualTime, reducedMotion, true);
+    if (game.aiming || demo) this._drawRushAim(game, reducedMotion, demo);
+    this._recordTrail(game.player, worldTime);
+    if (!reducedMotion && !demo) this._drawPlayerTrail(worldTime);
+    this._drawPlayer(game.player, visualTime, reducedMotion);
+    this._drawRushFocus(game);
+  }
+
+  /** Every recorded vertex is retained, including wall reflection points. */
+  _drawRushPath(points, color, alpha, width = 1, dash = NO_DASH, until = Infinity) {
+    if (!points?.length) return;
+    const ctx = this.ctx;
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = width;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let index = 1; index < points.length; index += 1) {
+      const point = points[index];
+      if (point.t > until) {
+        sampleRushPath(points, until, this._point);
+        ctx.lineTo(this._point.x, this._point.y);
+        break;
+      }
+      ctx.lineTo(point.x, point.y);
+    }
+    ctx.stroke();
+    ctx.setLineDash(NO_DASH);
+    ctx.globalAlpha = 1;
+  }
+
+  _drawRushWisp(x, y, radius, alpha, friendly = false) {
+    if (this._spriteSheet) {
+      this._drawSprite(friendly ? 0 : 1, x, y, radius * 4, alpha);
+      return;
+    }
+    const ctx = this.ctx;
+    if (this._portraitRush) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(-Math.PI / 2);
+      x = 0;
+      y = 0;
+    }
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = friendly ? MINT : LILAC;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 0.9, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = '#18243c';
+    ctx.beginPath();
+    ctx.ellipse(x - radius * 0.29, y, 2, 4, 0, 0, TAU);
+    ctx.ellipse(x + radius * 0.29, y, 2, 4, 0, 0, TAU);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    if (this._portraitRush) ctx.restore();
+  }
+
+  _drawRushTarget(target, worldTime, visualTime, reducedMotion, nemesis = false) {
+    if (!(target.hp > 0) || !Number.isFinite(target.x) || !Number.isFinite(target.y)) return;
+    const ctx = this.ctx;
+    const radius = target.radius || 20;
+    const warning = target.warningUntil > worldTime;
+    const color = nemesis ? ROSE : LILAC;
+    // Initial enemies have their own routes; later enemies also share a stored trace.
+    if (!target.sourceTraceId) this._drawRushPath(target.path, color, nemesis ? 0.16 : 0.09, 1, RUSH_PATH_DASH);
+    if (warning) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.3;
+      ctx.globalAlpha = reducedMotion ? 0.55 : 0.4 + Math.sin(visualTime * 7) * 0.12;
+      ctx.setLineDash([3, 5]);
+      ctx.beginPath();
+      ctx.arc(target.x, target.y, radius + 7, 0, TAU);
+      ctx.stroke();
+      ctx.setLineDash(NO_DASH);
+    }
+    this._drawRushWisp(target.x, target.y, radius, warning ? 0.5 : 0.98);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 0.9;
+    ctx.globalAlpha = warning ? 0.35 : 0.42;
+    ctx.beginPath();
+    ctx.arc(target.x, target.y, radius, 0, TAU);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    if (nemesis || target.maxHp > 1) {
+      this._drawBossHealth(target.x, target.y, {
+        hp: target.hp, maxHp: target.maxHp || 6, defeated: false,
+      }, color, warning, 0);
+    }
+  }
+
+  _drawRushRelay(relay, worldTime) {
+    const points = relay.points;
+    if (!points?.length) return;
+    const active = worldTime >= relay.startAt;
+    const progress = Math.max(0, Math.min(1, relay.progress || 0)) * points[points.length - 1].t;
+    this._drawRushPath(points, MINT, active ? 0.2 : 0.1, 1.2, RUSH_PATH_DASH);
+    if (!active) return;
+    this._drawRushPath(points, MINT, 0.65, 2.5, NO_DASH, progress);
+    if (!sampleRushPath(points, progress, this._point)) return;
+    this._drawRushWisp(this._point.x, this._point.y, 11, 0.56, true);
+  }
+
+  _drawRushAim(game, reducedMotion, demo) {
+    const ctx = this.ctx;
+    const player = game.player;
+    const target = demo ? game.targets?.find((enemy) => enemy.hp > 0) : null;
+    const aimX = target?.x ?? game.aim?.x ?? game.aimX ?? player.x + (player.dirX || 0) * 250;
+    const aimY = target?.y ?? game.aim?.y ?? game.aimY ?? player.y + (player.dirY || -1) * 250;
+    const points = previewDash(game, aimX, aimY);
+    if (!points?.length) return;
+    this._drawRushPath(points, MINT, demo ? 0.35 : 0.8, 1.7, RUSH_AIM_DASH);
+    const landing = points[points.length - 1];
+    const ready = player.dashCooldown <= 0;
+    ctx.strokeStyle = ready ? MINT : '#9caeb7';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = demo ? 0.5 : ready ? 0.9 : 0.45;
+    ctx.beginPath();
+    ctx.arc(landing.x, landing.y, player.radius + 4, 0, TAU);
+    ctx.stroke();
+    ctx.globalAlpha *= 0.4;
+    ctx.beginPath();
+    ctx.moveTo(landing.x - 4, landing.y);
+    ctx.lineTo(landing.x + 4, landing.y);
+    ctx.moveTo(landing.x, landing.y - 4);
+    ctx.lineTo(landing.x, landing.y + 4);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  _drawRushFocus(game) {
+    if (!game.aiming) return;
+    const ctx = this.ctx;
+    const player = game.player;
+    const focus = Math.max(0, Math.min(1, (game.focus || 0) / 1.2));
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = MINT;
+    ctx.globalAlpha = 0.12;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, 25, 0, TAU);
+    ctx.stroke();
+    if (focus > 0) {
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, 25, -Math.PI / 2, -Math.PI / 2 + TAU * focus);
+      ctx.stroke();
+    }
     ctx.globalAlpha = 1;
   }
 
@@ -535,6 +744,12 @@ export class Renderer {
       if (effect.kind === 'text') {
         ctx.font = `600 ${effect.size}px ui-monospace, SFMono-Regular, Consolas, monospace`;
         ctx.fillText(effect.label, effect.x, effect.y - (reducedMotion ? 0 : progress * 28));
+      } else if (effect.kind === 'burst') {
+        ctx.globalAlpha *= 0.45;
+        ctx.lineWidth = 2 * fade + 0.5;
+        ctx.beginPath();
+        ctx.arc(effect.x, effect.y, reducedMotion ? effect.size : effect.size * Math.min(1, progress * 2.5), 0, TAU);
+        ctx.stroke();
       } else if (effect.kind === 'ring') {
         ctx.globalAlpha *= 0.5;
         ctx.lineWidth = 1.25 * fade + 0.3;

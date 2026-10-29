@@ -1,22 +1,37 @@
 # AFTER YOU · 身后是你
 
-**冲破自己的过去，再把走位变成朋友的 Boss。**
+**把过去，变成下一招。**
 
-一款把行动轨迹变成敌人的网页街机游戏。先挑战 60 秒回环，再把自己的走位做成三阶段 Boss，让朋友用 30 秒打败你。
+回声暴走是一局 36 秒的街机战斗。按住瞄准，松手冲刺，选择接力、折返、爆裂与剪枝，让自己的真实路线变成敌人或武器。击败终局回声才算获胜。
 
 [English](README.md) · [GitHub 仓库](https://github.com/LancerLSY/after-you) · [贡献与玩法改造](CONTRIBUTING.md) · [MIT 代码许可](LICENSE)
 
-**[直接开始试玩](https://after-you-echo-arcade.lanceryou.chatgpt.site)** · **[观看 14 秒脚本演示](https://after-you-echo-arcade.lanceryou.chatgpt.site/assets/launch-demo.webm)**
+**[直接开始试玩](https://after-you-echo-arcade.lanceryou.chatgpt.site)**
 
 无需注册或安装，也可以按下方说明在本机运行。
 
-![AFTER YOU 游戏画面：发光角色、光点与过去行动形成的回声](docs/gameplay.png)
+![AFTER YOU 游戏画面：发光角色、光点与过去行动形成的回声](docs/rush-gameplay.png)
+
+## 回声暴走：让下一招换一种打法
+
+新默认模式针对首轮试玩提出的“过程单调、缺少变化”修改战斗循环。
+
+- 开场就有三个可击碎目标。按住鼠标或空格瞄准，松手冲刺；命中会返还冷却。
+- 战斗第 6 秒和第 16 秒选择能力：**接力、折返、爆裂、剪枝**。接力精确复制你刚才的真实路线，折返改变路径几何，爆裂改变击杀范围，剪枝删除旧路线及其敌对回声。
+- 慢动作专注有上限；瞄准仍消耗战斗时间，选择能力时暂停。
+- 第 26 秒出现六点生命的终局回声，须在 36 秒前击败它。只绕圈生存无法获胜。
+- 挑战链接分享种子与自报成绩，朋友可以尝试不同组合。Rush 回放包含输入和能力选择。
+
+WASD / 方向键可移动，按住鼠标或空格瞄准，松手出招，Esc 暂停。原有 60 秒经典与好友 Boss 模式可从[经典 / 好友 BOSS](https://after-you-echo-arcade.lanceryou.chatgpt.site/?classic=1)进入；旧版挑战链接继续使用旧规则。
+
+现有[14 秒脚本演示](https://after-you-echo-arcade.lanceryou.chatgpt.site/assets/launch-demo.webm)展示旧版经典 / Boss 玩法；短片导出也保留在这些模式中。机制与回放已做软件验证，复玩意愿仍需真人检验。
+
 
 ## 看示范、导出短片、离线游玩
 
-**先看一局示范**会播放引擎重新计算的 Boss 回放，使用脚本操控，明确标注且不计入个人纪录。
+**经典 / 好友 Boss 模式里的“先看一局示范”**会播放引擎重新计算的 Boss 回放，使用脚本操控，明确标注且不计入个人纪录。
 
-一局结束后选择**导出短片**，可把最后最多 14 秒制作成 720×960 的无声竖版视频。先预览，再点击**下载视频**。浏览器支持的格式为 WebM 或 MP4；录像不会上传。示范导出的短片保留“脚本示范”标记。
+在上述模式一局结束后选择**导出短片**，可把最后最多 14 秒制作成 720×960 的无声竖版视频。先预览，再点击**下载视频**。浏览器支持的格式为 WebM 或 MP4；录像不会上传。示范导出的短片保留“脚本示范”标记。
 
 生成单文件离线版：
 
@@ -113,3 +128,5 @@ console.log({ score: game.score, phase: game.phase, seconds: game.time });
 可以试试更长的冲刺、更紧的收集窗口、不同回声节奏或更易辨认的视觉主题。改变规则的版本应明确命名，与原版挑战成绩分开。回放兼容性及测试要求见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 代码采用 [MIT 许可](LICENSE)。生成美术的来源与说明见 [docs/assets-provenance.md](docs/assets-provenance.md)。
+
+Rush 回放由 `dist/rush.js` 的 `exportRushReplay()` 记录输入和升级选择，使用 `runRushReplay()` 重算；其 kind 为 `rush`。经典 / Boss 的原版回放继续由 `dist/engine.js` 处理。

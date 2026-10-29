@@ -3,7 +3,22 @@ import { Renderer } from './renderer.js';
 import { encodeBoss, decodeBoss } from './boss-codec.js';
 import { ReplayClip } from './clip.js';
 import { demoReplay, demoBossCode } from './demo-replay.js';
+import {mountRush} from './rush-ui.js';
 
+const routeURL = new URL(location.href);
+const legacyRoute = routeURL.searchParams.get('classic') === '1'
+  || routeURL.searchParams.get('v') === '1'
+  || new URLSearchParams(location.hash.slice(1)).has('boss')
+  || (routeURL.searchParams.has('seed') && routeURL.searchParams.get('rush') !== '1' && routeURL.searchParams.get('v') !== '2');
+// Boss fragments are complete challenge routes, including when entered from Rush.
+window.addEventListener('hashchange',()=>{
+  const hadBoss=new URLSearchParams(routeURL.hash.slice(1)).has('boss');
+  const hasBoss=new URLSearchParams(location.hash.slice(1)).has('boss');
+  if(hadBoss||hasBoss)location.reload();
+});
+if (!legacyRoute) {
+  await mountRush();
+} else {
 const $ = (id) => document.getElementById(id);
 const safeStorage = {
   get(key) { try { return localStorage.getItem(`after-you:${key}`); } catch { return null; } },
@@ -332,7 +347,6 @@ if((incomingSeed&&!challenge&&mode!=='boss')||invalidBoss)$('status').textConten
 try{if(!await renderer.load())throw new Error('Sprite loading failed');}catch{$('status').textContent=language==='zh'?'部分美术资源加载失败，请刷新重试。':'Some artwork could not load. Please refresh to retry.';}
 requestAnimationFrame(frame);
 
-// A URL fragment carries a whole challenge; following another one must reload its rules.
-window.addEventListener('hashchange',()=>{if(activeBoss||new URLSearchParams(location.hash.slice(1)).has('boss'))location.reload();});
 
 window.addEventListener('pagehide',cancelRecording);
+}
