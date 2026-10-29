@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
+    "lab": "node prototype-server.mjs",
     "test": "node --test tests/*.test.js",
     "check": "node scripts/check.mjs",
     "build:portable": "node scripts/build-portable.mjs",

@@ -10,6 +10,8 @@ Echo Rush is a 36-second arena game. Hold to aim, release to dash, then choose a
 
 No account or installation needed. You can also run it locally below.
 
+Two experimental alternatives are now available locally: **Combination Garden**, a twelve-placement chain-building game, and **Odd Lot**, an absurd-object auction with optional real DeepSeek buyers. Run `npm run lab` and open [the lab](http://127.0.0.1:4178/lab/). See [prototype rules and delivery status](docs/lab-prototypes.md); these are not yet the public homepage.
+
 ![AFTER YOU gameplay: a glowing player, collected light, and echoes of past movements](docs/rush-gameplay.png)
 
 ## Echo Rush: build a different next move
