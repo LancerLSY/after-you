@@ -1,6 +1,8 @@
-import { createGame, step, stepReplay, clearInput, seedFromDate, exportReplay, RULES } from './engine.js';
+import { createGame, step, stepReplay, clearInput, seedFromDate, exportReplay, runReplay, RULES } from './engine.js';
 import { Renderer } from './renderer.js';
 import { encodeBoss, decodeBoss } from './boss-codec.js';
+import { ReplayClip } from './clip.js';
+import { demoReplay, demoBossCode } from './demo-replay.js';
 
 const $ = (id) => document.getElementById(id);
 const safeStorage = {
@@ -9,7 +11,7 @@ const safeStorage = {
 };
 const copy = {
   en: {
-    how:'How to play', source:'GitHub ↗', headline:'Your past is<br>coming for you.',
+    demo:'Watch a demo ↗', demoNote:'SCRIPTED DEMO · NOT A PERSONAL SCORE', demoTitle:'Your moves could be next.', saveClip:'Save a clip', clipPreparing:'Preparing your replay…', clipRecording:'RECORDING CLIP', clipSaved:'Clip ready. Preview it and choose Download video.', clipTitle:'Your replay, ready to share.', downloadClip:'Download video', clipPrivacy:'The video stays on your device until you choose to share it.', clipCanceled:'Clip canceled.', clipFailed:'This browser could not record the clip. Replay and score-card export still work.', how:'How to play', source:'GitHub ↗', headline:'Your past is<br>coming for you.',
     lede:'Collect light. Break your echoes.<br>Turn your run into a boss.', daily:'Daily loop', free:'Free play', bossLab:'Boss lab', enter:'Enter the loop',
     keys:'WASD / arrows to move · Space to dash', touch:'Drag in the arena to move · Tap DASH', best:'YOUR BEST', score:'SCORE', loop:'LOOP',
     arenaHint:'Every 10 seconds, your path becomes an echo.', breath:'Take a breath.', paused:'Time stands still.', resume:'Back to the loop', restart:'Start again',
@@ -30,7 +32,7 @@ const copy = {
     help:'<p><strong>Move</strong> with WASD / arrow keys, or press and drag inside the arena. On a phone, drag like a joystick.</p><p><strong>Collect mint lights.</strong> Keep collecting within 4 seconds to build a multiplier up to ×5. Lights fade after 8 seconds.</p><p><strong>Every 10 seconds, an echo repeats your exact path.</strong> Purple echoes cost one of your 3 lives on contact. Faint echoes are waking up and cannot hurt you yet.</p><p><strong>Press Space or tap DASH</strong> to burst through an echo. Dashing makes you invincible. A shattered echo returns after 2 seconds; your dash recharges in 2.4 seconds.</p><p>Each echo pays a bonus once per loop, only if you collected light while recording it. Survive all 60 seconds for a bonus. <strong>Esc pauses</strong>; switching tabs pauses automatically.</p><p>Daily loops use the same UTC date worldwide. Scores stay on your device. Challenge scores are self-reported; replays can be recomputed.</p>',
   },
   zh: {
-    how:'玩法', source:'GitHub ↗', headline:'身后是你。<br>冲破过去。', lede:'收集光点，冲破回声。<br>把你的走位，变成朋友的 BOSS。', daily:'每日回环', free:'自由练习', bossLab:'BOSS 练习', enter:'进入回环',
+    demo:'先看一局示范 ↗', demoNote:'脚本示范 · 不计入个人成绩', demoTitle:'下一位 BOSS，可以是你。', saveClip:'导出短片', clipPreparing:'正在准备回放…', clipRecording:'正在录制短片', clipSaved:'短片已生成，请预览并点击下载视频。', clipTitle:'你的回放，可以带走了。', downloadClip:'下载视频', clipPrivacy:'视频保留在你的设备上，由你决定是否分享。', clipCanceled:'已取消短片录制。', clipFailed:'此浏览器无法录制短片，仍可导出回放和成绩卡。', how:'玩法', source:'GitHub ↗', headline:'身后是你。<br>冲破过去。', lede:'收集光点，冲破回声。<br>把你的走位，变成朋友的 BOSS。', daily:'每日回环', free:'自由练习', bossLab:'BOSS 练习', enter:'进入回环',
     keys:'WASD / 方向键移动 · 空格冲刺', touch:'在场内拖动来移动 · 点击 DASH 冲刺', best:'个人最佳', score:'得分', loop:'回环',
     arenaHint:'每过 10 秒，你的轨迹就会变成回声。', breath:'缓一口气。', paused:'时间为你停下。', resume:'回到这一刻', restart:'重新开始',
     again:'再来一局 ↗', challenge:'挑战朋友', watch:'观看回放', saveReplay:'导出回放', saveCard:'保存成绩卡', replay:'回放中', close:'关闭', touchHelp:'在场内拖动来移动',
@@ -59,6 +61,10 @@ if (supportedVersion && incomingSeed && incomingSeed.length <= 128 && /^[a-zA-Z0
 let game = createGame(seed);
 let state = 'idle';
 let resultGame = null;
+let resultIsDemo = false;
+let clipPhase = null;
+let clipURL = null;
+const replayClip = new ReplayClip();
 let replayData = null;
 let replayIndex = 0;
 let replayFrame = 0;
@@ -91,6 +97,7 @@ function applyLanguage() {
   $('help-content').innerHTML = t('help') + (language==='zh'?'<p><strong>制造 BOSS：</strong>游玩至少 8 秒、收集 3 颗光点并移动足够距离后，结算可把轨迹变成 3 阶段 BOSS。先打赢它，再分享。挑战中要在 30 秒内冲刺命中 9 次，收光可缩短冲刺冷却。</p>':'<p><strong>Make a boss:</strong> play at least 8 seconds, collect 3 lights and keep moving. Turn the run into a 3-phase boss from the results screen. Beat it to unlock sharing. Land 9 dashes in 30 seconds; lights recharge your dash.</p>');
   $('sound-button').textContent = t(soundEnabled ? 'soundOn' : 'soundOff');
   $('sound-button').setAttribute('aria-pressed', String(soundEnabled));
+  $('clip-button').hidden=!ReplayClip.isSupported();
   updatePlayLabel(); updateSeed(); updateHUD();
   if (resultGame && state === 'result') renderResults(false);
 }
@@ -112,6 +119,7 @@ function updateSeed() {
 function randomSeed() { const n = new Uint32Array(2); crypto.getRandomValues(n); return 'free-'+Array.from(n,x=>x.toString(36)).join('-'); }
 function changeMode(next) {
   if (state === 'playing' || state === 'paused') return;
+  cancelRecording(); resultIsDemo=false;
   mode = next; challenge = false; activeBoss=null;activeBossCode='';ownBoss=false;bossWon=false;seed = next === 'daily' ? seedFromDate() : randomSeed();
   if(next==='boss'){activeBossCode=STARTER_BOSS_CODE;activeBoss=decodeBoss(activeBossCode);seed=activeBoss.seed;}
   state='idle'; game=createGame(seed,activeBoss?{boss:activeBoss}:{}); resultGame=null; $('result-overlay').hidden=true; $('replay-tag').hidden=true;
@@ -127,6 +135,7 @@ function tone(frequency, duration=.12, type='sine', volume=.035) {
 }
 function resetInput() { keys.clear(); pointer.active=false; touchDash=false; dashPulse=false; clearInput(game); }
 function start() {
+  cancelRecording(); resultIsDemo=false;
   ensureAudio(); resetInput();
   if(mode==='free') seed=randomSeed();
   if(mode==='daily') seed=seedFromDate();
@@ -182,7 +191,9 @@ function renderResults(isBest) {
   const won=resultGame.phase==='won';
   $('result-overlay').hidden=false;$('result-note').textContent=t(isBest?'newBest':won?(resultGame.mode==='boss'?'bossComplete':'complete'):'end');
   $('result-title').textContent=resultGame.mode==='boss'?(won?(language==='zh'?'你击败了这段过去。':'You beat their past.'):(language==='zh'?'这段过去，还没结束。':'This past fights back.')):t(won?'survive':'lost');$('result-score').textContent=resultGame.score.toLocaleString();$('result-detail').textContent=t('detail')(resultGame);
-  const forgeable=encodeBoss(resultGame);$('forge-button').hidden=!forgeable;$('forge-button').textContent=language==='zh'?'把我的轨迹变成 BOSS ↗':'Turn my run into a boss ↗';
+  if(resultIsDemo){$('result-note').textContent=t('demoNote');$('result-title').textContent=t('demoTitle');}
+  $('clip-button').disabled=Boolean(clipPhase);
+  const forgeable=!resultIsDemo&&encodeBoss(resultGame);$('forge-button').hidden=!forgeable;$('forge-button').textContent=language==='zh'?'把我的轨迹变成 BOSS ↗':'Turn my run into a boss ↗';
   $('share-button').disabled=mode==='boss'&&ownBoss&&!bossWon;
   $('share-button').textContent=mode==='boss'?(ownBoss&&!bossWon?(language==='zh'?'先击败自己，再分享':'Beat it before sharing'):(language==='zh'?'发送 BOSS 挑战':'Send boss challenge')):t('challenge');
 }
@@ -197,21 +208,51 @@ function inputVector(){
   }
   return {x,y,dash:dashPulse||keys.has('Space')||touchDash};
 }
-function playReplay(){
+function playReplay({seekTicks=0}={}){
   if(!replayData)return;
   game=createGame(replayData.seed,replayData.boss?{boss:replayData.boss}:{});state='replay';replayIndex=0;replayFrame=0;replayAccumulator=0;resetInput();renderer.reset?.();
+  let skipped=0;
+  while(skipped<seekTicks&&replayIndex<replayData.inputs.length){const input=replayData.inputs[replayIndex];stepReplay(game,input);skipped++;replayFrame++;if(replayFrame>=input.frames){replayIndex++;replayFrame=0;}}
+  renderer.reset?.();
+  $('replay-tag').querySelector('span').textContent=clipPhase?t('clipRecording'):resultIsDemo?(language==='zh'?'脚本示范':'SCRIPTED DEMO'):t('replay');
   $('result-overlay').hidden=true;$('replay-tag').hidden=false;document.body.classList.add('replaying');$('status').textContent='';
 }
-function stopReplay(){state='result';game=resultGame;$('replay-tag').hidden=true;document.body.classList.remove('replaying');renderResults(false);updateHUD();}
+function stopReplay(cancelClip=true){
+  if(clipPhase){
+    if(cancelClip){cancelRecording();$('share-status').textContent=t('clipCanceled');}
+    else if(clipPhase==='recording'){renderer.render(game,{reducedMotion});replayClip.draw($('game-canvas'),game);replayClip.stop();}
+  }
+  state='result';game=resultGame;$('replay-tag').hidden=true;document.body.classList.remove('replaying');renderResults(false);updateHUD();
+}
+function cancelRecording(){replayClip.cancel();clipPhase=null;if(clipURL){$('clip-preview').pause();$('clip-preview').removeAttribute('src');URL.revokeObjectURL(clipURL);clipURL=null;}if($('clip-dialog').open)$('clip-dialog').close();}
+function watchDemo(){
+  if(state==='playing'||state==='paused')return;
+  cancelRecording();$('share-status').textContent='';resultGame=runReplay(demoReplay);replayData=demoReplay;resultIsDemo=true;
+  activeBoss=demoReplay.boss;activeBossCode=demoBossCode;seed=activeBoss.seed;mode='boss';challenge=false;ownBoss=false;bossWon=false;
+  updateSeed();playReplay();
+}
+async function recordClip(){
+  if(!replayData||clipPhase||!ReplayClip.isSupported())return;
+  clipPhase='preparing';$('clip-button').disabled=true;$('share-status').textContent=t('clipPreparing');
+  const ready=await replayClip.start({language,scriptedDemo:resultIsDemo,onComplete:(blob,extension)=>{
+    clipPhase=null;if(state==='replay')stopReplay(false);$('clip-button').disabled=false;
+    if(clipURL)URL.revokeObjectURL(clipURL);clipURL=URL.createObjectURL(blob);
+    $('clip-preview').src=clipURL;$('clip-download').href=clipURL;$('clip-download').download=`after-you-${resultIsDemo?'scripted-demo':'replay'}.${extension}`;
+    $('share-status').textContent=t('clipSaved');$('clip-dialog').showModal();
+  },onError:()=>{clipPhase=null;if(state==='replay')stopReplay(false);$('clip-button').disabled=false;$('share-status').textContent=t('clipFailed');}});
+  if(!ready||clipPhase!=='preparing')return;
+  playReplay({seekTicks:Math.max(0,replayData.ticks-840)});clipPhase='recording';
+}
+
 function advanceReplay(dt){
   replayAccumulator+=dt;
   while(replayAccumulator>=1/60 && state==='replay'){
     const input=replayData.inputs[replayIndex];
-    if(!input){stopReplay();break;}
+    if(!input){stopReplay(false);break;}
     // Recorded dash values are one-frame edges. The engine handles their release.
     stepReplay(game,input);handleEvents(game.events);replayFrame++;replayAccumulator-=1/60;
     if(replayFrame>=input.frames){replayIndex++;replayFrame=0;}
-    if(game.phase!=='playing'||replayIndex>=replayData.inputs.length)stopReplay();
+    if(game.phase!=='playing'||replayIndex>=replayData.inputs.length)stopReplay(false);
   }
 }
 function frame(now){
@@ -221,11 +262,11 @@ function frame(now){
     if(game.phase!=='playing')finish();
     else if(Math.floor(game.time)!==lastSecond){lastSecond=Math.floor(game.time);if(lastSecond===50)flash(t('countdown'),2);}
   }else if(state==='replay')advanceReplay(dt);
-  renderer.render(game,{demo:state==='idle',reducedMotion,now:now/1000});updateHUD();
+  renderer.render(game,{demo:state==='idle',reducedMotion,now:now/1000});if(clipPhase==='recording'&&replayClip.active)replayClip.draw($('game-canvas'),game);updateHUD();
   if(now>messageUntil)$('arena-message').classList.remove('visible');
   requestAnimationFrame(frame);
 }
-function challengeURL(){const link=new URL(location.href);link.search='';link.hash='';if(mode==='boss'){link.hash='boss='+activeBossCode;return link.href;}link.searchParams.set('seed',resultGame.seed);link.searchParams.set('score',String(resultGame.score));link.searchParams.set('v','1');return link.href;}
+function challengeURL(){const link=new URL(location.protocol==='file:'?'https://after-you-echo-arcade.lanceryou.chatgpt.site/':location.href);link.search='';link.hash='';if(mode==='boss'){link.hash='boss='+activeBossCode;return link.href;}link.searchParams.set('seed',resultGame.seed);link.searchParams.set('score',String(resultGame.score));link.searchParams.set('v','1');return link.href;}
 async function share(){
   if(!resultGame||(mode==='boss'&&ownBoss&&!bossWon))return;
   const link=challengeURL();const text=mode==='boss'?(language==='zh'?'这段走位变成了一个 BOSS。30 秒，9 次冲刺，你能打败它吗？':'These moves became a boss. 30 seconds. 9 strikes. Can you beat it?'):language==='zh'?`AFTER YOU 身后是你｜我拿了 ${resultGame.score} 分。相同光点，你能冲破自己的过去吗？`:`AFTER YOU · ${resultGame.score} points. Same lights. Can you outrun — and shatter — your past?`;
@@ -241,6 +282,7 @@ async function saveCard(){
   ctx.fillStyle='#080e15';ctx.fillRect(0,0,1200,630);
   ctx.strokeStyle='#bca6ff';ctx.lineWidth=2;for(const x of [89,119]){ctx.beginPath();ctx.arc(x,67,22,0,Math.PI*2);ctx.stroke();}
   ctx.fillStyle='#f4f1db';ctx.font='22px sans-serif';ctx.fillText('A F T E R  Y O U',165,76);
+  if(resultIsDemo){ctx.fillStyle='#ffce9b';ctx.font='18px sans-serif';ctx.fillText(language==='zh'?'脚本示范 · 不计入个人成绩':'SCRIPTED DEMO · NOT A PERSONAL SCORE',650,76);}
   ctx.font='bold 72px sans-serif';ctx.fillText(language==='zh'?'身后是你。冲破过去。':'Your past is coming.',70,195);
   ctx.fillStyle='#c9ff85';ctx.font='bold 170px monospace';ctx.fillText(String(resultGame.score),65,390);
   ctx.fillStyle='#bca6ff';ctx.font='25px sans-serif';ctx.fillText(t('detail')(resultGame),74,455);
@@ -257,12 +299,13 @@ $('language-button').addEventListener('click',()=>{language=language==='en'?'zh'
 $('sound-button').addEventListener('click',()=>{soundEnabled=!soundEnabled;safeStorage.set('sound',soundEnabled);ensureAudio();applyLanguage();if(soundEnabled)tone(650);});
 $('help-button').addEventListener('click',()=>{stoppedByHelp=state==='playing';if(stoppedByHelp)pause();$('help-dialog').showModal();});
 $('help-play').addEventListener('click',()=>{$('help-dialog').close();if(state==='paused')resume();else start();});
+$('clip-dialog').addEventListener('close',()=>{$('clip-preview').pause();});
 document.querySelectorAll('.dialog-close').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
 $('help-dialog').addEventListener('close',()=>{if(stoppedByHelp&&state==='paused'){$('resume-button').focus();}stoppedByHelp=false;});
 $('source-link').addEventListener('click',event=>{if($('source-link').getAttribute('href')==='#source'){event.preventDefault();if(state==='playing')pause();$('source-dialog').showModal();}});
 $('share-button').addEventListener('click',share);$('replay-button').addEventListener('click',playReplay);$('stop-replay').addEventListener('click',stopReplay);
 $('download-button').addEventListener('click',()=>{if(replayData)download(new Blob([JSON.stringify(replayData)],{type:'application/json'}),'after-you-replay.json');});
-$('card-button').addEventListener('click',saveCard);
+$('card-button').addEventListener('click',saveCard);$('clip-button').addEventListener('click',recordClip);$('demo-button').addEventListener('click',watchDemo);
 $('forge-button').addEventListener('click',()=>{const code=encodeBoss(resultGame);if(!code)return;activeBoss=decodeBoss(code);activeBossCode=code;seed=activeBoss.seed;mode='boss';ownBoss=true;bossWon=false;challenge=false;start();flash(language==='zh'?'这是你的轨迹。先打败它，再挑战朋友。':'These are your moves. Beat your boss to unlock sharing.',4);});
 document.addEventListener('keydown',event=>{
   if(document.querySelector('dialog[open]'))return;
@@ -291,3 +334,5 @@ requestAnimationFrame(frame);
 
 // A URL fragment carries a whole challenge; following another one must reload its rules.
 window.addEventListener('hashchange',()=>{if(activeBoss||new URLSearchParams(location.hash.slice(1)).has('boss'))location.reload();});
+
+window.addEventListener('pagehide',cancelRecording);

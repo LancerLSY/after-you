@@ -40,6 +40,7 @@
           <div class="personal"><span data-i18n="best">YOUR BEST</span><strong id="best-score">—</strong><span id="seed-label"></span></div>
           <p id="challenge-label" class="challenge-label" hidden></p>
           <p id="status" class="status" role="status" aria-live="polite"></p>
+          <button id="demo-button" class="demo-button" data-i18n="demo">Watch a demo ↗</button>
         </div>
         <div class="arena-column">
           <div class="arena" id="arena">
@@ -59,7 +60,7 @@
               <p class="result-detail" id="result-detail"></p>
               <div class="result-actions"><button id="again-button" class="primary" data-i18n="again">One more loop ↗</button><button id="share-button" class="secondary" data-i18n="challenge">Challenge a friend</button></div>
               <button id="forge-button" class="forge-button" hidden></button>
-              <div class="result-links"><button id="replay-button" data-i18n="watch">Watch replay</button><button id="download-button" data-i18n="saveReplay">Save replay</button><button id="card-button" data-i18n="saveCard">Save score card</button></div>
+              <div class="result-links"><button id="replay-button" data-i18n="watch">Watch replay</button><button id="download-button" data-i18n="saveReplay">Save replay</button><button id="card-button" data-i18n="saveCard">Save score card</button><button id="clip-button" data-i18n="saveClip" hidden>Save a clip</button></div>
               <p id="share-status" role="status" class="share-status"></p>
             </section>
             <div id="replay-tag" class="replay-tag" hidden><span data-i18n="replay">REPLAY</span><button id="stop-replay" data-i18n="close">Close</button></div>
@@ -80,6 +81,7 @@
     <div id="help-content"></div><button id="help-play" class="primary" data-i18n="gotIt">Got it. Let's play ↗</button>
   </dialog>
   <dialog id="source-dialog"><button class="dialog-close" aria-label="Close source information">×</button><h2>Built to be remixed.</h2><p data-i18n="sourceBody">A tiny, dependency-free arcade engine. Deterministic replays, seeded challenges, and all the game rules in one readable module.</p><p id="source-status" data-i18n="sourcePending">The public repository is being prepared. The game is fully playable here.</p></dialog>
+  <dialog id="clip-dialog" class="clip-dialog"><button class="dialog-close" aria-label="Close video preview">×</button><h2 data-i18n="clipTitle">Your replay, ready to share.</h2><video id="clip-preview" controls playsinline preload="metadata" aria-label="Recorded replay video"></video><a id="clip-download" class="primary" download data-i18n="downloadClip">Download video</a><p data-i18n="clipPrivacy">The video stays on your device until you choose to share it.</p></dialog>
   <script type="module" src="app.js"></script>
 </body>
 </html>

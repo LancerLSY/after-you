@@ -6,9 +6,26 @@
 
 [English](README.md) · [GitHub 仓库](https://github.com/LancerLSY/after-you) · [贡献与玩法改造](CONTRIBUTING.md) · [MIT 代码许可](LICENSE)
 
-**[所有者预览](https://after-you-echo-arcade.lanceryou.chatgpt.site)**——目前为私有访问，公开访问等待授权。完整游戏可按下方说明在本机运行。
+**[直接开始试玩](https://after-you-echo-arcade.lanceryou.chatgpt.site)** · **[观看 14 秒脚本演示](https://after-you-echo-arcade.lanceryou.chatgpt.site/assets/launch-demo.webm)**
+
+无需注册或安装，也可以按下方说明在本机运行。
 
 ![AFTER YOU 游戏画面：发光角色、光点与过去行动形成的回声](docs/gameplay.png)
+
+## 看示范、导出短片、离线游玩
+
+**先看一局示范**会播放引擎重新计算的 Boss 回放，使用脚本操控，明确标注且不计入个人纪录。
+
+一局结束后选择**导出短片**，可把最后最多 14 秒制作成 720×960 的无声竖版视频。先预览，再点击**下载视频**。浏览器支持的格式为 WebM 或 MP4；录像不会上传。示范导出的短片保留“脚本示范”标记。
+
+生成单文件离线版：
+
+```sh
+npm run build:portable
+```
+
+用现代浏览器打开 `output/after-you.html`。代码、美术和字体都已内嵌，生成的文件不需要本地服务器或安装依赖。浏览器权限等限制见[离线版说明](docs/portable.md)。这个本地构建不会发布网站或改变线上访问权限。
+
 
 ## 一分钟，对手是每个过去的你
 
@@ -35,7 +52,7 @@ npm test
 npm run check
 ```
 
-35 项测试使用 Node 内置测试运行器，覆盖模拟、碰撞、计分、回放校验、Boss 编码与战斗，以及每日种子。`npm run check` 检查 JavaScript 语法、资源引用和疑似凭据字符串。自动化平衡性探针仅用于开发诊断，不是真人试玩或留存证据。
+测试使用 Node 内置测试运行器，覆盖模拟、碰撞、计分、回放校验、Boss 编码与战斗，以及每日种子。`npm run check` 检查 JavaScript 语法、资源引用和疑似凭据字符串。自动化平衡性探针仅用于开发诊断，不是真人试玩或留存证据。
 
 ## 把自己的走位变成 Boss
 

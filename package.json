@@ -1,6 +1,19 @@
 {
-  "name": "after-you", "version": "0.1.0", "private": true, "type": "module",
+  "name": "after-you",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
   "description": "A 60-second arcade game where your past becomes your next target.",
-  "scripts": {"dev":"node server.mjs", "start":"node server.mjs", "test":"node --test tests/*.test.js", "check":"node scripts/check.mjs"},
-  "engines":{"node":">=20"}, "license":"MIT"
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.js",
+    "check": "node scripts/check.mjs",
+    "build:portable": "node scripts/build-portable.mjs",
+    "demo:refresh": "node scripts/balance-probe.mjs --write-demo"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
 }

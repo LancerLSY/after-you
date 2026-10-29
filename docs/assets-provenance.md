@@ -13,3 +13,5 @@ All game artwork was generated for this project with the built-in OpenAI ImageGe
 Code is MIT licensed. Generated artwork is supplied with permission to reuse and modify for this project and its forks to the extent rights are available; this is not a claim of exclusive copyright in AI-generated imagery. The font retains its own OFL license.
 
 UI changes after the concept: the dash-to-shatter mechanic, daily/free modes, pause/result/replay states, local best, Chinese translation, and player-made Boss mode were added for functional requirements. The live renderer, not the mockup, is the gameplay implementation.
+
+- `dist/assets/launch-demo.webm`: 14-second capture of the built-in deterministic Boss demo. Controls are scripted and visibly labeled; this is not human playtest or retention evidence. The engine recomputes all shown states from recorded inputs. Only WebM Duration metadata was repaired; video frame bytes were preserved.

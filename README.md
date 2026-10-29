@@ -6,9 +6,26 @@ A browser arcade game where your movements become the enemy. Survive a 60-second
 
 [中文说明](README.zh-CN.md) · [GitHub](https://github.com/LancerLSY/after-you) · [Contribute a mod](CONTRIBUTING.md) · [MIT code](LICENSE)
 
-**[Owner preview](https://after-you-echo-arcade.lanceryou.chatgpt.site)** — currently private; public access is pending authorization. Run the complete game locally below.
+**[Play in your browser](https://after-you-echo-arcade.lanceryou.chatgpt.site)** · **[Watch the 14-second scripted demo](https://after-you-echo-arcade.lanceryou.chatgpt.site/assets/launch-demo.webm)**
+
+No account or installation needed. You can also run it locally below.
 
 ![AFTER YOU gameplay: a glowing player, collected light, and echoes of past movements](docs/gameplay.png)
+
+## Watch, record, and take it offline
+
+**Watch a demo** plays a real, recomputed Boss replay using scripted controls. It is labeled as a scripted demo and never updates your personal best.
+
+After a run, **Save a clip** renders up to its last 14 seconds into a silent 720×960 vertical video. Preview the result, then choose **Download video**. WebM or MP4 support depends on the browser; the game does not upload the recording. Demo exports retain the scripted-demo label.
+
+For a self-contained local copy:
+
+```sh
+npm run build:portable
+```
+
+Open `output/after-you.html` in a modern browser. Artwork, font and code are embedded; no local server or package installation is needed for the generated file. See [portable edition details](docs/portable.md) for browser permission limits. This local build does not publish a website or change hosted access.
+
 
 ## One minute. Every version of you.
 
@@ -35,7 +52,7 @@ npm test
 npm run check
 ```
 
-The 35 tests use Node's built-in runner and cover simulation, collisions, scoring, replay validation, Boss encoding and combat, and daily seeds. `npm run check` checks JavaScript syntax, asset references, and credential-like strings. Automated balance probes are development diagnostics, not human playtests or evidence of retention.
+The tests use Node's built-in runner and cover simulation, collisions, scoring, replay validation, Boss encoding and combat, and daily seeds. `npm run check` checks JavaScript syntax, asset references, and credential-like strings. Automated balance probes are development diagnostics, not human playtests or evidence of retention.
 
 ## Turn your run into a boss
 

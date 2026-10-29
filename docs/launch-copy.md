@@ -1,125 +1,120 @@
-# AFTER YOU：发布文案与 15 秒实机演示
+# AFTER YOU：Boss挑战发布素材
 
-状态：待正式试玩地址与源码地址核验的草稿；未代为发布。玩法依据 `design-spec.md`：收集光点、留下回声、冲刺穿过回声。下列文案不含用户数、榜单、独创首发或万星宣称。
+更新日期：2026-10-29 UTC。源码已公开：[LancerLSY/after-you](https://github.com/LancerLSY/after-you)。用户已明确授权本站公开，访问设置已更新，未登录 HTTP 200 和实际浏览器页面均已验证。本文件仅为素材，未代发任何帖子或消息。
 
-发布前用真实地址替换 `{{PLAY_URL}}`、`{{REPO_URL}}`、`{{REPLAY_DOC_URL}}`。凡实机尚不能证明的功能句，删除后再发；不要将模板变量原样发出。最终文案应与所录版本一致。
+主叙事：**你的走位，成为朋友的Boss。** 实际流程是完成一局、把合格轨迹生成三阶段Boss、自己先击败，再分享给朋友；朋友有30秒挑战。Boss路线经过采样与量化，不宣称AI克隆或逐帧还原。
 
-## 玩家向：英文短帖
+新脚本演示、720×960竖版导出与离线单HTML包已实现，发布前仍需验收。最近提供的star快照为0；任何素材均不使用万星徽章、真人留存、首创或全球排名措辞。
 
-Your past self has become your next target.
+已验证试玩地址：https://after-you-echo-arcade.lanceryou.chatgpt.site/ 。账号上的发帖、私信或邮件仍需对应发布授权；公开站点不等于自动向他人发送消息。
 
-AFTER YOU is a 60-second browser arcade game. Collect light, leave echoes of your movement, then dash through them to score.
+## 60字以内中文配文
 
-Play a round: {{PLAY_URL}}
+> 你的走位，变成朋友的Boss。先打赢自己，再把挑战交给朋友。三阶段，30秒。画面为真实引擎脚本示范。
 
-随帖使用下方实机短片。只有挑战链接已验收，才可加：“Same seed. Your turn. Send a challenge to a friend.”
+正文不含链接，共50个字符（含标点、数字及Boss字母）；试玩地址另行附上。此版专用于脚本示范，不能删掉末句后把自动演示冒充个人实录。
 
-## 玩家向：中文短帖
+## 英文短配文（60词以内）
 
-刚才的你，成了现在的目标。
+> Your moves become your friend's boss. Beat it yourself, then send the challenge. Three phases. Thirty seconds. This clip is a scripted demonstration running in the real game engine.
 
-AFTER YOU 是一个每局60秒的网页小游戏：收集光点，留下重复你动作的回声，再冲刺穿过它们得分。
+若平台严格限制为60个英文字符，可用：
 
-来一局：{{PLAY_URL}}
+> Your moves. Your friend's boss. Scripted engine demo.
 
-挑战链接已验收后可加：“同一局挑战，换你试试。把这局挑战发给朋友。”
+## 玩家向完整帖：中文
 
-## 开发者向：英文
+你的走位，成为朋友的Boss。
 
-**AFTER YOU — a small arcade game built around replayable movement**
+在AFTER YOU里玩一局，把轨迹做成三阶段Boss。自己先打赢，再把挑战发给朋友：30秒，看谁能冲破你的路线。
 
-Collect light. Leave an echo. Dash through your past.
+试玩：https://after-you-echo-arcade.lanceryou.chatgpt.site/
+源码：https://github.com/LancerLSY/after-you
 
-The game runs in the browser. The source includes a fixed-step simulation and deterministic input replay, with tests for repeating the same run. The runtime has no third-party JavaScript dependencies, and the game rules can be changed locally.
+这段视频是运行于真实游戏引擎的脚本示范，不计个人成绩。
 
-Try it: {{PLAY_URL}}
-Read and run the code: {{REPO_URL}}
-Replay implementation and tests: {{REPLAY_DOC_URL}}
+## 玩家向完整帖：英文
 
-I'd like feedback on the first round: when did the echo-and-dash mechanic become clear? If you find a replay mismatch, please include the rules version and the saved run.
+Your moves become your friend's boss.
 
-使用条件：固定步进、确定性测试、导出回放及对应文档均已验收。某项未实现时删除该项，不能将路线图写成现有功能。
+Play a run in AFTER YOU and turn your route into a three-phase boss. Beat it yourself, then send the challenge. Your friend has 30 seconds to break through.
+
+Play: https://after-you-echo-arcade.lanceryou.chatgpt.site/
+Source: https://github.com/LancerLSY/after-you
+
+This video is a scripted demonstration running in the real game engine. It is not a personal score.
 
 ## 开发者向：中文
 
-**AFTER YOU：把动作回放做成一个60秒游戏**
+**把一次走位，装进朋友可玩的Boss挑战。**
 
-收集光点，留下回声，冲刺穿过刚才的自己。
+AFTER YOU把玩家移动记录采样为三个阶段。创作者先自测击败，才能在正常界面分享挑战链接。输入回放则单独用固定步进模拟重现原始游戏。
 
-源码包含固定步进模拟、输入回放和验证同一局结果的测试。游戏运行时没有第三方JavaScript依赖，可以在本地修改规则，观察难度和节奏怎样变化。
+源码已公开，游戏运行时不依赖第三方JavaScript包。可以读回放校验、修改规则，或复现一个触控/挑战链接问题。
 
-试玩：{{PLAY_URL}}
-源码与运行方式：{{REPO_URL}}
-回放实现与测试：{{REPLAY_DOC_URL}}
+源码与运行方式：https://github.com/LancerLSY/after-you
+公开试玩验收后附：https://after-you-echo-arcade.lanceryou.chatgpt.site/
 
-想听听你的首局感受：你在什么时候看懂了“留下回声，再冲刺穿过它”？遇到回放不一致，可以附规则版本和保存的回放一起提issue。
+想验证的问题很具体：朋友收到你做的Boss后，会不会真的开玩，并做一个新的回来？目前还没有真人传播或留存结论。
 
-## Show HN 候选稿
+## 开发者向：英文
 
-仅当项目已具备可讨论的实际技术与设计投入、可以直接试玩，且发布者能亲自回答问题时使用。先核对[当前规则](https://news.ycombinator.com/showhn.html)。不把AI生成速度或“几分钟做完”作为展示理由。
+**Turn a recorded route into a boss a friend can play.**
 
-标题：
+AFTER YOU samples a player's movement into three boss phases. The creator must beat their own boss before the normal sharing flow unlocks. A separate fixed-step input replay reproduces the original simulation.
 
-> Show HN: After You, a 60-second browser game where you dash through your past
+The source is public, with no third-party JavaScript runtime dependencies. You can inspect replay validation, change the rules, or reproduce a touch-control or challenge-link issue.
 
-首条说明：
+Source and local setup: https://github.com/LancerLSY/after-you
+After public access is approved and tested: https://after-you-echo-arcade.lanceryou.chatgpt.site/
 
-> AFTER YOU starts with collecting light. Your movement leaves echoes, and dashing through those echoes earns points. The same path becomes both a problem and an opportunity on the next pass.
->
-> Play: {{PLAY_URL}}
-> Source: {{REPO_URL}}
->
-> The implementation uses a fixed-step simulation and recorded input for deterministic replays. Rules are kept small enough to modify and test locally, without third-party runtime JavaScript dependencies.
->
-> I'm looking for feedback on whether the first round communicates the mechanic, and whether replaying your own movement stays interesting after a few rounds. The replay notes and tests are here: {{REPLAY_DOC_URL}}.
+The next question is behavioral: does a friend actually play the boss and send a new challenge back? Human sharing and retention have not been measured yet.
 
-发布者须实际参与制作并能回答实现问题；实现句同样受发布验收约束。
+离线包与短片导出通过验收后，可追加实际可用说明。不要把“WebM或MP4，取决于浏览器”改成“所有手机一键导出MP4”，也不要写成已验证的传播效果。
 
-## itch.io 页面候选稿
+## 15秒脚本示范成片与字幕
 
-**Short description**
+**来源标识：00:00–00:15全段为SCRIPTED DEMO／脚本示范，不计个人成绩。** 录制真实引擎执行的预录脚本，保留界面原有标识。脚本能够证明动作与反馈存在，不能证明真人打出了这个成绩或愿意复玩。
 
-Collect light, leave echoes, and dash through your past in a 60-second arcade game.
+字幕文件：`launch-captions.zh.srt`、`launch-captions.en.srt`。两份均为五个连续3秒字幕段，每段第一行保留来源标识；这是脚本演示专用字幕，不用于给真人录像误贴标签。
 
-**Description**
-
-Every path you take becomes something to deal with later. Collect light to build your score, then dash through the echoes you leave behind.
-
-A round lasts up to 60 seconds. Try again, change your route, and see what happens when your past catches up.
-
-Play: {{PLAY_URL}}
-Source and contribution notes: {{REPO_URL}}
-
-操作说明从正式版本界面逐项抄录；不要凭模板写按键。设备标签、每日挑战、本地最好成绩与回放能力只列验收过的功能。封面和截图使用真实游戏画面；概念图不能标为实机截图。
-
-## 15 秒实机演示脚本
-
-目标：即使静音，也能看懂“过去的轨迹变成现在的目标”。先录完整真实一局，再剪辑；不改分数、计时器、命中反馈或回声数量。剪接允许，字幕不制造连续实时的错觉。
-
-| 时间 | 实机画面 | 英文字幕 | 中文字幕 |
+| 成片时间 | 画面选择 | 中文字幕第二行 | 英文字幕第二行 |
 | --- | --- | --- | --- |
-| 0–2秒 | 角色经过两三个光点，保留真实得分反馈 | Collect light. | 收集光点。 |
-| 2–5秒 | 展示第一道回声沿刚才路径移动；稍留空隙让观众认出轨迹 | Leave an echo. | 留下刚才的自己。 |
-| 5–8秒 | 角色冲刺穿过一道回声，清楚显示命中、消散与实际分数变化 | Dash through your past. | 冲刺，穿过你的过去。 |
-| 8–12秒 | 切到同一局后段的一次真实连贯操作；多个回声可见但不遮挡角色 | Your route becomes your next move. | 上一条路线，下一次机会。 |
-| 12–15秒 | 切到真实结束画面，再展示标题与可读试玩域名 | AFTER YOU · Play a round | AFTER YOU · 来一局 |
+| 0–3秒 | 脚本示范的Boss路线清楚可见，保留计时与阶段信息 | 你的走位，成为朋友的Boss。 | Your moves become a boss. |
+| 3–6秒 | 实际阶段切换或不同路径；从完整示范中剪取，不伪造连续时间 | 三个阶段，都是你的路线。 | Three phases. Your route. |
+| 6–9秒 | 冲刺命中、血量变化和消散清晰可读 | 冲破路线，击败每个阶段。 | Dash through. Break each phase. |
+| 9–12秒 | 实际接近胜利/结果画面；“先击败再分享”作为规则字幕，不伪造脚本解锁分享 | 自己先打赢，再挑战朋友。 | Beat yours. Then challenge a friend. |
+| 12–15秒 | 实际结果片段加结尾标题卡；最后1秒可展示标题和已授权入口 | AFTER YOU｜下一位Boss，可以是你。 | AFTER YOU. Be their next boss. |
 
-导出横版与竖版时重新安排字幕，不裁掉玩家、冲刺反馈、生命或真实计时器。最后三秒只保留一个试玩入口，GitHub放在正文或结束页开发者入口。声音采用实际游戏音效；静音也须可读。若只能录到基本操作，先发基本操作，不合成未实现玩法。
+英文第一行：`SCRIPTED DEMO · NOT A PERSONAL SCORE`。
+中文第一行：`脚本示范｜不计个人成绩`。
 
-## 真实更新与贡献邀请模板
+开头不要展示尚未录制的“真人创作”或“好友反应”。若没有某一阶段的清晰真实片段，修改字幕和剪辑，不能合成不存在的游戏反馈。源视频按真实时间播放；跨阶段可剪接，不修改计时器或分数。静音导出也能理解，不添加未经授权的音乐。
 
-英文：
+## 玩家自己一局的14秒竖版导出
 
-> Updated AFTER YOU: {{VERIFIED_CHANGE}}. Here's the same recorded run before and after the change. {{EVIDENCE_LINK}}
+验收后的导出只使用该局回放末14秒，尺寸720×960，文件格式由浏览器选择WebM或MP4。它与上方15秒编辑宣传片不同。需要15秒成片时，可加1秒标题卡；不拉伸游戏录像，也不把缺少的游戏时长补成虚假实录。
+
+只有实际人工操作的个人对局，才可标“个人实录／PLAYER RUN”；脚本或自动化输入必须继续标“脚本示范／SCRIPTED DEMO”。视频本身若是挑战朋友的Boss，不应写成“这是我创造的Boss”。
+
+真实个人创作Boss的配文候选：
+
+> 中文：这条路线是我走出来的，这个Boss我先打过了。换你试试。https://after-you-echo-arcade.lanceryou.chatgpt.site/
 >
-> Try it: {{PLAY_URL}}
-> Feedback I'm checking next: {{ONE_SPECIFIC_QUESTION}}
+> English: I made this route and beat the boss it became. Your turn. https://after-you-echo-arcade.lanceryou.chatgpt.site/
 
-中文：
+该第一人称文案只能由完成相应真实对局的人使用，不能给脚本示范套用。普通对局或挑战朋友的录像改写为“这是我刚才的一局／This was my run”，不虚构创作归属。
 
-> AFTER YOU 更新：{{已验证的改动}}。这里是同一段回放的前后对比：{{证据链接}}。
+## 公开授权后的一次最小发布
+
+只使用一个已获相应发布授权的入口、一段带来源标识的实机片、一个公开可玩的URL和源码链接。不群发，不代发私信或邮件。
+
+先观察6对自愿好友：创作者自测通过→朋友确认收到→朋友实际开玩→朋友制作并自测新Boss→原作者实际开玩回挑战。最后一步才算往返闭环。分享点击、复制成功、自动演示和模型试玩不算好友开玩；首次受邀传递不称自然传播。24小时内不催促回发。完整口径与停止条件见 `launch-plan.md`。
+
+更新帖只写发生过的改变：
+
+> 中文：AFTER YOU更新：{{已验收改动}}。这段是{{脚本示范／有证据的个人对局}}。试玩：https://after-you-echo-arcade.lanceryou.chatgpt.site/。接下来想了解：朋友收到你的Boss后，在哪一步停下来了？
 >
-> 试玩：{{PLAY_URL}}
-> 这一轮重点想了解：{{一个具体问题}}。
+> English: AFTER YOU update: {{VERIFIED_CHANGE}}. This clip is {{SCRIPTED_DEMO_OR_VERIFIED_PLAYER_RUN}}. Play: https://after-you-echo-arcade.lanceryou.chatgpt.site/. Where did your friend stop between opening the challenge and playing it?
 
-仅在确有贡献入口时追加：“欢迎提供可复现的回放问题、规则变体或本地化改进。每项任务的范围和验收条件见仓库。”收藏请求可选：“如果游戏或回放实现对你有用，可以在 GitHub 收藏。”不要求转发、投票或star换奖励。
+未开展实验时，不添加“大家停不下来”“朋友都在玩”等结论。GitHub收藏请求保持可选，不以游戏奖励换star。
